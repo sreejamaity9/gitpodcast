@@ -7,6 +7,7 @@ from groq import Groq
 import pyttsx3
 from datetime import datetime
 from dotenv import load_dotenv
+from gtts import gTTS
 
 load_dotenv()
 
@@ -79,7 +80,7 @@ Style: Exciting, friendly, and informative. Structure it like a real podcast int
 Keep it natural and spoken-language friendly. Do not include timestamps or sound effect instructions."""
 
     response = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-versatile",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.75,
         max_tokens=600
@@ -89,21 +90,11 @@ Keep it natural and spoken-language friendly. Do not include timestamps or sound
     return script
 
 def generate_audio(script):
-    engine = pyttsx3.init()
-    engine.setProperty('rate', 155)
-    engine.setProperty('volume', 0.95)
-    
-    # Optional: female voice (index depends on system)
-    # voices = engine.getProperty('voices')
-    # engine.setProperty('voice', voices[1].id if len(voices) > 1 else voices[0].id)
-    
+    tts = gTTS(script, lang='en')
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = f"podcast_{timestamp}.wav"
+    filename = f"podcast_{timestamp}.mp3"
     filepath = os.path.join("static", "audio", filename)
-    
-    engine.save_to_file(script, filepath)
-    engine.runAndWait()
-    
+    tts.save(filepath)
     return filename
 
 @app.route("/")
