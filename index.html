@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepoCast • GitHub to Podcast</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', system_ui, sans-serif;
+            background: #0a0a0a;
+            color: #e5e5e5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 620px;
+            width: 92%;
+            background: #111111;
+            border-radius: 16px;
+            padding: 40px 32px;
+            box-shadow: 0 20px 60px -10px rgba(0,0,0,0.6);
+            border: 1px solid #222;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            color: #888;
+            font-size: 1.05rem;
+            margin-bottom: 32px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        input {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: white;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #0066ff;
+        }
+
+        button {
+            background: #0066ff;
+            color: white;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #0052cc;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+
+        #status {
+            min-height: 24px;
+            text-align: center;
+            margin: 16px 0;
+            font-weight: 500;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid #333;
+            border-top: 3px solid #0066ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #player {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #333;
+        }
+
+        audio {
+            width: 100%;
+        }
+
+        #script {
+            margin-top: 20px;
+            background: #1a1a1a;
+            padding: 18px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            color: #555;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RepoCast</h1>
+        <p class="tagline">Turn any GitHub repository into a 1-2 minute podcast</p>
+
+        <input type="text" id="repo-url" placeholder="https://github.com/username/repository">
+        <input type="text" id="github-token" placeholder="GitHub Token (optional - for private repos)">
+
+        <button id="generate-btn" onclick="generatePodcast()">Generate Podcast</button>
+
+        <div id="status"></div>
+
+        <div id="player" style="display: none;">
+            <audio id="audio-player" controls></audio>
+            <div id="script"></div>
+        </div>
+
+        <div class="footer">
+            Powered by Groq • pyttsx3 • Flask
+        </div>
+    </div>
+
+    <script>
+        async function generatePodcast() {
+            const url = document.getElementById('repo-url').value.trim();
+            const token = document.getElementById('github-token').value.trim();
+            const btn = document.getElementById('generate-btn');
+            const status = document.getElementById('status');
+            const player = document.getElementById('player');
+            const audio = document.getElementById('audio-player');
+            const scriptEl = document.getElementById('script');
+
+            if (!url) {
+                status.innerHTML = '<span style="color:#ff5555">Please enter a GitHub repository URL</span>';
+                return;
+            }
+
+            btn.disabled = true;
+            status.innerHTML = '<span class="spinner"></span> Fetching repository &amp; generating podcast...';
+
+            player.style.display = 'none';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, token })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    status.innerHTML = `✅ Podcast ready for <strong>${data.repo_name}</strong>`;
+                    audio.src = data.audio_url;
+                    scriptEl.textContent = data.script;
+                    player.style.display = 'block';
+                } else {
+                    status.innerHTML = `❌ Error: ${data.error}`;
+                }
+            } catch (err) {
+                status.innerHTML = '❌ Network error. Please try again.';
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
