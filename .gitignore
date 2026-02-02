@@ -1,5 +1,5 @@
 .env
-myvenv/
+sreeja/
 __pycache__/
 *.pyc
 static/audio/
