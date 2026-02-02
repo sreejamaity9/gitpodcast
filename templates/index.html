@@ -156,7 +156,7 @@
         </div>
 
         <div class="footer">
-            Powered by Groq • pyttsx3 • Flask
+            Powered by Groq • gTTS • Flask
         </div>
     </div>
 
@@ -190,15 +190,15 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    status.innerHTML = `✅ Podcast ready for <strong>${data.repo_name}</strong>`;
+                    status.innerHTML = `Podcast ready for <strong>${data.repo_name}</strong>`;
                     audio.src = data.audio_url;
                     scriptEl.textContent = data.script;
                     player.style.display = 'block';
                 } else {
-                    status.innerHTML = `❌ Error: ${data.error}`;
+                    status.innerHTML = `Error: ${data.error}`;
                 }
             } catch (err) {
-                status.innerHTML = '❌ Network error. Please try again.';
+                status.innerHTML = 'Network error. Please try again.';
                 console.error(err);
             } finally {
                 btn.disabled = false;
