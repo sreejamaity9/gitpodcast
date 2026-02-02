@@ -61,7 +61,7 @@ def get_repo_info(owner, repo, token=None):
     )
 
 def generate_podcast_script(repo_name, description, languages, readme):
-    prompt = f"""You are an engaging tech podcast host. Create a lively, conversational 1-2 minute podcast script (approximately 220-300 words) introducing this GitHub repository.
+    prompt = f"""You are an engaging tech podcast host of Hindi language. Create a lively, conversational 1-2 minute podcast script (approximately 220-300 words) introducing this GitHub repository.
 
 Repository: {repo_name}
 Description: {description}
